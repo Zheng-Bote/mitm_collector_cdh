@@ -40,7 +40,7 @@ const (
 	defaultTimeout    = 60 * time.Second
 )
 
-var version = "dev"
+var version = "0.2.0"
 
 type jobArgs struct {
 	SourceName string `json:"source_name"`
