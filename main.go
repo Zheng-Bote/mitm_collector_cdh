@@ -106,7 +106,7 @@ func run(ctx context.Context) error {
 
 	args, err := parseJobArgs()
 	if err != nil {
-		return err
+		return fail(newIPCClient(args), err)
 	}
 	ipc := newIPCClient(args)
 	ipc.sendStatus("started", "CDH collector started", 0)
@@ -304,6 +304,9 @@ func (c *ipcClient) sendAudit(message string) {
 }
 
 func (c *ipcClient) message(message string) string {
+	if c.topic == "" || c.sourceName == "" {
+		return message
+	}
 	return fmt.Sprintf("%s: %s: %s", c.topic, c.sourceName, message)
 }
 
@@ -574,6 +577,7 @@ func releaseVersion() string {
 }
 
 func fail(ipc *ipcClient, err error) error {
-	ipc.sendStatus("failed", "collector failed; see collector logs for details", 0)
+	ipc.sendStatus("failed", err.Error(), 0)
+	ipc.sendAudit("ERROR: " + err.Error())
 	return err
 }
